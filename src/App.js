@@ -1,25 +1,41 @@
-import logo from './logo.svg';
 import './App.css';
+import Checkbox from './Components/Checkbox';
+import Textarea from './Components/Textarea';
+import { useState, useEffect } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 function App() {
+  const [editMode, setEditMode] = useState(false);
+  const [text, setText] = useState("");
+
+  const handleChange = () => {
+    setEditMode(!editMode);
+  }
+
+  async function fetchText() {
+    let response = await fetch('/text.md');
+    let data = await response.text();
+    setText(data);
+  }
+
+  useEffect(() => {
+    fetchText();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Checkbox
+        label="Edit Mode"
+        value={editMode}
+        onChange={handleChange}
+      />
+      {editMode
+        ? <Textarea text={text} onChange={setText} readOnly={!editMode} />
+        : <ReactMarkdown children={text} remarkPlugins={[remarkGfm]} />
+      }
     </div>
-  );
+  )
 }
 
 export default App;
